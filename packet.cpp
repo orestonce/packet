@@ -3,41 +3,25 @@
 #include <arpa/inet.h>
 #include <stdexcept>
 
-#define PACKET_HEAD_SIZE 6
-
-int CPacket::GetPackMinLength()
-{
-	return PACKET_HEAD_SIZE;
-}
+#define P_OP_POS	0
+#define P_LENGTH_POS	2
 
 CPacket::CPacket(short op)
 {
 	memset(_buffer, 0, sizeof(_buffer) );
 	_rpos = _wpos = PACKET_HEAD_SIZE;
-
+	
 	SetOp(op);
 }
 
 void CPacket::SetOp(short op)
 {
-	if ( op < 0 || op > 0xFFFF )
-		throw std::runtime_error("Unexpected packet op !");
-	
-	int oldw = _wpos;
-	_wpos = 0;
-	WriteShort( op );
-	_wpos = oldw;
+	WriteShort(_buffer + P_OP_POS, op);
 }
 
 short CPacket::GetOp()
 {
-	int oldr = _rpos;
-
-	_rpos = 0;
-	short op = ReadShort();
-	_rpos = oldr;
-
-	return op;
+	return ReadShort(_buffer + P_OP_POS);
 }
 
 char* CPacket::GetBuffer()
@@ -50,6 +34,21 @@ int CPacket::GetLength()
 	return _wpos;
 }
 
+void CPacket::SetBuffer(const char* data, int dataLength)
+{
+	if ( !IsValidLength(dataLength) )
+		throw std::logic_error("dataLength is invalid !");
+
+	int len = ReadInt(data + P_LENGTH_POS);
+	if ( len != dataLength )
+		throw std::runtime_error("Buffer length not equals dataLength !");
+
+	memset(_buffer, 0, sizeof(_buffer) );
+	memcpy(_buffer, data, dataLength);
+	_rpos = PACKET_HEAD_SIZE;
+	_wpos = dataLength;
+}
+
 #define CHECK_WPOS(sz) \
 	if ( _wpos + sz > sizeof(_buffer) ) \
 		throw std::runtime_error("Too many write data !")
@@ -57,9 +56,9 @@ int CPacket::GetLength()
 void CPacket::WriteInt(int data)
 {
 	CHECK_WPOS( 4 );
-	
-	*(int*)( _buffer + _wpos) = htonl( data );
 
+	WriteInt(_buffer + _wpos, data);
+	
 	_wpos += 4;
 }
 
@@ -67,7 +66,8 @@ void CPacket::WriteShort(short data)
 {
 	CHECK_WPOS( 2 );
 
-	*(short*)(_buffer + _wpos) = htons( data );
+	WriteShort(_buffer + _wpos, data);
+
 	_wpos += 2;
 }
 
@@ -75,7 +75,8 @@ void CPacket::WriteByte(char data)
 {
 	CHECK_WPOS( 1 );
 
-	*(char*)(_buffer + _wpos) = data;
+	WriteByte(_buffer + _wpos, data);
+
 	_wpos += 1;
 }
 
@@ -84,15 +85,13 @@ void CPacket::WriteByteArray(const char* data, int length)
 	CHECK_WPOS(length);
 
 	memcpy(_buffer + _wpos, data, length);
+
 	_wpos += length;
 }
 
 void CPacket::Flush()
 {
-	int oldw = _wpos;
-	_wpos = 2;
-	WriteInt( oldw );
-	_wpos = oldw;
+	WriteInt(_buffer + P_LENGTH_POS, _wpos );
 }
 
 #define CHECK_RPOS(sz) \
@@ -103,7 +102,7 @@ int CPacket::ReadInt()
 {
 	CHECK_RPOS(4);
 	
-	int data = ntohl( *(int*)(_buffer + _rpos) );
+	int data = ReadInt(_buffer + _rpos);
 	_rpos += 4;
 
 	return data;
@@ -113,7 +112,7 @@ short CPacket::ReadShort()
 {
 	CHECK_RPOS(2);
 
-	short data = ntohs( *(short*)(_buffer + _rpos) );
+	short data = ReadShort(_buffer + _rpos);
 	_rpos += 2;
 	
 	return data;
@@ -123,7 +122,7 @@ char CPacket::ReadByte()
 {
 	CHECK_RPOS(1);
 
-	char data = *(char *)( _buffer + _rpos );
+	char data = ReadByte(_buffer + _rpos);
 	_rpos += 1;
 
 	return data;
@@ -137,27 +136,47 @@ void CPacket::ReadByteArray(char *data, int length)
 	_rpos += length;
 }
 
-bool CPacket::Init(const char* data, int dataLength)
+int CPacket::ReadInt(const char* ptr)
 {
-	if ( dataLength < PACKET_HEAD_SIZE || dataLength > sizeof(_buffer) )
-		return false;
-	
-	memcpy(_buffer, data, dataLength);
-	_rpos = _wpos = PACKET_HEAD_SIZE;
-
-	return true;
+	return ntohl( *(int*)ptr );
 }
 
-bool CPacket::ParseLength(const char* data, int dataLength, int& packLength)
+short CPacket::ReadShort(const char* ptr)
 {
-	if ( dataLength < PACKET_HEAD_SIZE || !data )
-		return false;
-	
-	CPacket p;
-	p.Init(data, dataLength);
-	
-	p._rpos = 2;
-	packLength = p.ReadInt();
+	return ntohs( *(int*)ptr );
+}
 
-	return true;
+char CPacket::ReadByte(const char* ptr)
+{
+	return *ptr;
+}
+
+void CPacket::WriteInt(char *ptr, int data)
+{
+	*(int*)ptr = htonl( data );
+}
+
+void CPacket::WriteShort(char *ptr, short data)
+{
+	*(short*) ptr = htons( data );
+}
+
+void CPacket::WriteByte(char *ptr, char data)
+{
+	*ptr = data;
+}
+
+bool CPacket::IsValidLength(int len)
+{
+	return PACKET_HEAD_SIZE <= len && len <= PACKET_MAX_SIZE;
+}
+
+int CPacket::ParseLength(const char *data)
+{
+	return ReadInt(data +  P_OP_POS);
+}
+
+short CPacket::ParseOp(const char* data)
+{
+	return ReadShort(data);
 }
