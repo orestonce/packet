@@ -1,17 +1,90 @@
 #include "packet.h"
 #include <string.h>
-#include <arpa/inet.h>
 #include <stdexcept>
+#include <stdint.h>
 
 #define P_OP_POS	0
 #define P_LENGTH_POS	2
 
+bool CPacket::HostIsBigEndian()
+{
+	union {
+		char	s[2];
+		short	i;
+	} data;
+
+	data.i	= 1;
+
+	return (data.s[0] == 0 );
+}
+
+long CPacket::HostToNetLong(long data)
+{
+	long ret = data;
+
+	if ( !HostIsBigEndian() )
+	{
+		char *p1 = (char*)&ret;
+		char *p2 = (char*)&data;
+
+		p1[0]	= p2[7];
+		p1[1]	= p2[6];
+		p1[2]	= p2[5];
+		p1[3]	= p2[4];
+		p1[4]	= p2[3];
+		p1[5]	= p2[2];
+		p1[6]	= p2[1];
+		p1[7]	= p2[0];
+	}
+
+	return ret;
+}
+
+int CPacket::HostToNetInt(int data)
+{
+	int ret = data;
+
+	if ( !HostIsBigEndian() )
+	{
+		char *p1 = (char*)&ret;
+		char *p2 = (char*)&data;
+
+		p1[0]	= p2[3];
+		p1[1]	= p2[2];
+		p1[2]	= p2[1];
+		p1[3]	= p2[0];
+	}
+
+	return ret;
+}
+
+short CPacket::HostToNetShort(short data)
+{
+	short ret = data;
+
+	if ( !HostIsBigEndian() )
+	{
+		char *p1 = (char*)&ret;
+		char *p2 = (char*)&data;
+
+		p1[0]	= p2[1];
+		p1[1]	= p2[0];
+	}
+
+	return ret;
+}
+
 CPacket::CPacket(short op)
+{
+	Reset();
+
+	SetOp(op);
+}
+
+void CPacket::Reset()
 {
 	memset(_buffer, 0, sizeof(_buffer) );
 	_rpos = _wpos = PACKET_HEAD_SIZE;
-	
-	SetOp(op);
 }
 
 void CPacket::SetOp(short op)
@@ -52,6 +125,15 @@ void CPacket::SetBuffer(const char* data, int dataLength)
 #define CHECK_WPOS(sz) \
 	if ( _wpos + sz > sizeof(_buffer) ) \
 		throw std::runtime_error("Too many write data !")
+
+void CPacket::WriteLong(long data)
+{
+	CHECK_WPOS( 8 );
+	
+	WriteLong(_buffer + _wpos, data);
+
+	_wpos += 8;
+}
 
 void CPacket::WriteInt(int data)
 {
@@ -98,6 +180,16 @@ void CPacket::Flush()
 	if ( _rpos + sz > _wpos ) \
 		throw std::runtime_error("Has no data to read !")
 
+long CPacket::ReadLong()
+{
+	CHECK_RPOS(8);
+
+	long data = ReadLong(_buffer + _rpos);
+	_rpos += 8;
+	
+	return data;
+}
+
 int CPacket::ReadInt()
 {
 	CHECK_RPOS(4);
@@ -136,14 +228,19 @@ void CPacket::ReadByteArray(char *data, int length)
 	_rpos += length;
 }
 
+long CPacket::ReadLong(const char* ptr)
+{
+	return HostToNetLong( *(long*)ptr );
+}
+
 int CPacket::ReadInt(const char* ptr)
 {
-	return ntohl( *(int*)ptr );
+	return HostToNetInt( *(int*)ptr );
 }
 
 short CPacket::ReadShort(const char* ptr)
 {
-	return ntohs( *(int*)ptr );
+	return HostToNetShort( *(short*)ptr );
 }
 
 char CPacket::ReadByte(const char* ptr)
@@ -151,14 +248,19 @@ char CPacket::ReadByte(const char* ptr)
 	return *ptr;
 }
 
+void CPacket::WriteLong(char *ptr, long data)
+{
+	*(long*)ptr = HostToNetLong(data);
+}
+
 void CPacket::WriteInt(char *ptr, int data)
 {
-	*(int*)ptr = htonl( data );
+	*(int*)ptr = HostToNetInt(data);
 }
 
 void CPacket::WriteShort(char *ptr, short data)
 {
-	*(short*) ptr = htons( data );
+	*(short*) ptr = HostToNetShort(data);
 }
 
 void CPacket::WriteByte(char *ptr, char data)
