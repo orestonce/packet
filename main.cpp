@@ -22,6 +22,7 @@ public :
 	void TestBuffer_Int();
 	void TestBuffer_Long();
 	void TestBuffer_ByteArray();
+	void TestProtocol();
 private:
 	time_t lastReport;
 	time_t beginTime;
@@ -254,3 +255,8 @@ void CPacketTest::TestBuffer_ByteArray()
 	assert( memcmp(p.GetBuffer(), p2.GetBuffer(), p.GetLength()) == 0 );
 }
 
+void CPacketTest::TestProtocol()
+{
+	C2S_TitleGetInfoData d1;
+
+}

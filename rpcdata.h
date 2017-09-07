@@ -1,6 +1,8 @@
 #pragma once
 #include "localmacro.h"
 
+#include <string>
+#include <vector>
 class CPacket;
 
 class RDStringInfo
@@ -12,7 +14,8 @@ public :
 	void Encode(CPacket& p) const;
 	void Decode(CPacket& p);
 public :
-	std::string str; // 字符串
+	std::string str; // 
+	long msgId; // 消息ID
 };
 
 class RDIntShortPair
@@ -117,5 +120,20 @@ public :
 	void Decode(CPacket& p);
 public :
 	int roleId; // 角色ID
+};
+
+class S2C_TitleGetInfoReData
+{
+public :
+	S2C_TitleGetInfoReData();
+	void Clear();
+	const char* GetName() const;
+	void Encode(CPacket& p) const;
+	void Decode(CPacket& p);
+public :
+	int roleId; // 角色ID
+	int ret; // 返回值
+	std::vector<RDTitleInfo> titles; // 称号信息
+	std::vector<int> titles2; // 称号信息
 };
 

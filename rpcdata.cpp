@@ -1,6 +1,8 @@
 #include "rpcdata.h"
 #include "packet.h"
 
+#include <stdexcept>
+
 RDStringInfo::RDStringInfo()
 {
 	Clear();
@@ -9,6 +11,7 @@ RDStringInfo::RDStringInfo()
 void RDStringInfo::Clear()
 {
 	str.clear(); 
+	msgId = 0; 
 }
 
 const char* RDStringInfo::GetName() const
@@ -26,6 +29,7 @@ void RDStringInfo::Encode(CPacket& p) const
 			p.WriteByteArray(str.c_str(), len); 
 		}
 	}
+	p.WriteLong(msgId); 
 	p.Flush(); // 在包头部写入包大小信息
 }
 
@@ -42,6 +46,7 @@ void RDStringInfo::Decode(CPacket& p)
 			p.ReadByteArray( &(str[0]), len); 
 		}
 	}
+	msgId = p.ReadLong(); 
 }
 
 RDIntShortPair::RDIntShortPair()
@@ -144,6 +149,7 @@ void RDIntIntPair::Decode(CPacket& p)
 		{
 			CS2SS_LocalInfoData temp;
 			temp.Decode(p);
+			testVector.push_back(temp);
 		}
 	}
 }
@@ -288,5 +294,70 @@ void C2S_TitleGetInfoData::Encode(CPacket& p) const
 void C2S_TitleGetInfoData::Decode(CPacket& p)
 {
 	roleId = p.ReadInt(); 
+}
+
+S2C_TitleGetInfoReData::S2C_TitleGetInfoReData()
+{
+	Clear();
+}
+
+void S2C_TitleGetInfoReData::Clear()
+{
+	roleId = 0; 
+	ret = 0; 
+	titles.clear(); 
+	titles2.clear(); 
+}
+
+const char* S2C_TitleGetInfoReData::GetName() const
+{
+	return "S2C_TitleGetInfoReData";
+}
+
+void S2C_TitleGetInfoReData::Encode(CPacket& p) const
+{
+	p.WriteInt(roleId); 
+	p.WriteInt(ret); 
+	{
+		p.WriteInt(titles.size());
+		for(auto it = titles.begin(); it != titles.end(); ++it)
+		{
+			const RDTitleInfo& temp = *it;
+			temp.Encode(p);
+		}
+	}
+	{
+		p.WriteInt(titles2.size());
+		for(auto it = titles2.begin(); it != titles2.end(); ++it)
+		{
+			const int& temp = *it;
+			p.WriteInt(temp); 
+		}
+	}
+	p.Flush(); // 在包头部写入包大小信息
+}
+
+void S2C_TitleGetInfoReData::Decode(CPacket& p)
+{
+	roleId = p.ReadInt(); 
+	ret = p.ReadInt(); 
+	{
+		int sz = p.ReadInt();
+		for(int i = 0; i < sz; ++i)
+		{
+			RDTitleInfo temp;
+			temp.Decode(p);
+			titles.push_back(temp);
+		}
+	}
+	{
+		int sz = p.ReadInt();
+		for(int i = 0; i < sz; ++i)
+		{
+			int temp;
+			temp = p.ReadInt(); 
+			titles2.push_back(temp);
+		}
+	}
 }
 

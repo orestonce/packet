@@ -1,6 +1,7 @@
 <rpcdata>
 	<protocol name="RDStringInfo">
-		<item type="string" variable="str" mark="字符串"/>
+		<item type="string" variable="str" mark=""/>
+		<item type="long" variable="msgId" mark="消息ID"/>
 	</protocol>
 	<protocol name="RDIntShortPair">
 		<item type="int" variable="id" mark=""/>
@@ -34,6 +35,12 @@
 	</protocol>
 	<protocol name="C2S_TitleGetInfoData">
 		<item type="int" variable="roleId" mark="角色ID"/>
+	</protocol>
+	<protocol name="S2C_TitleGetInfoReData">
+		<item type="int" variable="roleId" mark="角色ID"/>
+		<item type="int" variable="ret" mark="返回值"/>
+		<item type="vector" subtype="RDTitleInfo" variable="titles" mark="称号信息"/>
+		<item type="vector" subtype="int" variable="titles2" mark="称号信息"/>
 	</protocol>
 </rpcdata>
 

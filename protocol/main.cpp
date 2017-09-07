@@ -38,7 +38,7 @@ struct SRpcdataDefine
 public :
     SRpcdataDefine()
     {
-        basicTypes = {"int", "short", "byte", "string"};
+        basicTypes = {"long", "int", "short", "byte", "string"};
         composeTypes = { "vector" };
     }
 
@@ -68,6 +68,8 @@ public :
 
         fprintf(fp, "#pragma once\n");
         fprintf(fp, "#include \"%s\"\n\n", includeFileName);
+        fprintf(fp, "#include <string>\n");
+        fprintf(fp, "#include <vector>\n");
         fprintf(fp, "class CPacket;\n\n");
         for(auto it = protocols.begin(); it != protocols.end(); ++it)
         {
@@ -102,7 +104,7 @@ public :
                 {
                     fprintf(fp, "\tchar %s; // %s\n", variable, mark);
                 }
-                else
+                else // long, int, short, protocols
                 {
                     fprintf(fp, "\t%s %s; // %s\n",
                         type, iDefine.variable.c_str(), iDefine.mark.c_str());
@@ -122,6 +124,7 @@ public :
         GenInclude(fp, if1);
         GenInclude(fp, if2);
         fprintf(fp, "\n");
+        fprintf(fp, "#include <stdexcept>\n\n");
 
         for(auto it = protocols.begin(); it != protocols.end(); ++it)
         {
@@ -250,7 +253,11 @@ private:
 
     void GenBasicEncode(FILE* fp, const char*variable, const std::string& pname, const char* prefix)
     {
-        if ( pname == "int" )
+        if ( pname == "long")
+        {
+            fprintf(fp, "%s\tp.WriteLong(%s); \n", prefix, variable);
+        }
+        else if ( pname == "int" )
         {
             fprintf(fp, "%s\tp.WriteInt(%s); \n", prefix, variable);
         }
@@ -281,7 +288,11 @@ private:
 
     void GenBasicDecode(FILE* fp, const char*variable, const std::string& pname, const char* prefix)
     {
-        if ( pname == "int" )
+        if ( pname == "long" )
+        {
+            fprintf(fp, "%s\t%s = p.ReadLong(); \n", prefix, variable);
+        }
+        else if ( pname == "int" )
         {
             fprintf(fp, "%s\t%s = p.ReadInt(); \n", prefix, variable);
         }
@@ -353,6 +364,7 @@ private:
                     {
                         assert(false);
                     }
+		fprintf(fp, "\t\t\t%s.push_back(temp);\n", variable);
                     fprintf(fp, "\t\t}\n");
                     fprintf(fp, "\t}\n");
                 }
@@ -462,10 +474,11 @@ int main()
 {
     SRpcdataDefine rpcdata;
 
-    rpcdata.LoadFile("rpcdata.xml");
+    rpcdata.LoadFile("./rpcdata.xml");
     rpcdata.GenDotH("../rpcdata.h", "localmacro.h");
     rpcdata.GenDotCpp("../rpcdata.cpp", "rpcdata.h", "packet.h");
 
     return 0;
 }
+
 
