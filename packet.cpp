@@ -275,10 +275,10 @@ bool CPacket::IsValidLength(int len)
 
 int CPacket::ParseLength(const char *data)
 {
-	return ReadInt(data +  P_OP_POS);
+	return ReadInt(data +  P_LENGTH_POS);
 }
 
 short CPacket::ParseOp(const char* data)
 {
-	return ReadShort(data);
+	return ReadShort(data + P_OP_POS);
 }
