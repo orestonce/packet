@@ -123,7 +123,7 @@ void CPacket::SetBuffer(const char* data, int dataLength)
 }
 
 #define CHECK_WPOS(sz) \
-	if ( _wpos + sz > sizeof(_buffer) ) \
+	if ( _wpos + sz > (int)sizeof(_buffer) ) \
 		throw std::runtime_error("Too many write data !")
 
 void CPacket::WriteLong(long data)
@@ -177,7 +177,7 @@ void CPacket::Flush()
 }
 
 #define CHECK_RPOS(sz) \
-	if ( _rpos + sz > _wpos ) \
+	if ( _rpos + sz > (int)_wpos ) \
 		throw std::runtime_error("Has no data to read !")
 
 long CPacket::ReadLong()
