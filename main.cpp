@@ -1,5 +1,5 @@
 #include "packet.h"
-#include "rpcdata.h"
+#include "rpcdata-server.h"
 #include <stdio.h>
 #include <assert.h>
 #include <stdlib.h>

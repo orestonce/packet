@@ -1,6 +1,4 @@
 #pragma once
-#include "localmacro.h"
-
 #include <string>
 #include <vector>
 class CPacket;
@@ -14,7 +12,7 @@ public :
 	void Encode(CPacket& p) const;
 	void Decode(CPacket& p);
 public :
-	std::string str; // 
+	std::string str; // 角色的uid
 	long msgId; // 消息ID
 };
 
