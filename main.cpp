@@ -40,6 +40,7 @@ int main()
 	test.TestBuffer_Int();
 	test.TestBuffer_Long();
 	test.TestBuffer_ByteArray();
+	test.TestProtocol();
 
 	return 0;
 }
@@ -257,6 +258,32 @@ void CPacketTest::TestBuffer_ByteArray()
 
 void CPacketTest::TestProtocol()
 {
-	C2S_TitleGetInfoData d1;
+	CPacket p;
+	
+	{
+		RDIntIntPair data;
+		CS2SS_LocalInfoData item;
+		
+		data.id		= 1234;
+		data.count	= 4321;
+		item.type	= 10;
+		item.id		= 18920;
 
+		data.testVector.push_back(item);
+
+		data.Encode(p);
+	}
+	
+	{
+		RDIntIntPair data;
+		data.Decode(p);
+		
+		assert(data.id	= 1234);
+		assert(data.count = 4321);
+		assert(data.testVector.size() == 1);
+		CS2SS_LocalInfoData &item = data.testVector[0];
+
+		assert(item.type == 10);
+		assert(item.id == 18920);
+	}
 }

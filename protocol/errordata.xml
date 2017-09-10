@@ -1,0 +1,10 @@
+<errordata>
+	<section mark="通用错误段" />
+	<item name="ERR_CLIENT_DATA" mark="客户端数据错误" />
+	<item name="ERR_SERVER_DATA" mark="服务器数据错误" />
+
+	<section mark="登陆错误" />
+	<item name="ERR_LOGIN_PASSWORD_ERROR" mark="密码错误" />
+	
+	<section mark="选择房间错误码"/>
+</errordata>

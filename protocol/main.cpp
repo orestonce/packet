@@ -12,6 +12,10 @@ int main()
     rpcdata.GenDotCpp("../rpcdata-server.cpp", "rpcdata-server.h", "packet.h", false);
     rpcdata.GenCSOPDotH("../csop.h");
 
+    CErrorData errordata;
+    errordata.LoadFile("errordata.xml");
+    errordata.GenDotH("../errordata.h");
+
     return 0;
 }
 

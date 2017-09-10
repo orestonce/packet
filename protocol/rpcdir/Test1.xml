@@ -1,0 +1,6 @@
+<rpcdata>
+	<protocol name="RDStringInfo2" forclient="true" csop="MSG_C2S_ReportUID2" mark="上报角色的uid2" waitmsg="MSG_S2C_ReportUID2Re">
+		<item type="string" variable="str" mark="角色的uid"/>
+		<item type="long" variable="msgId" mark="消息ID"/>
+	</protocol>
+</rpcdata>

@@ -95,43 +95,42 @@ public :
 	int ret; // 返回值
 };
 
-class RDTitleInfo
+class RDStringInfo2
 {
 public :
-	RDTitleInfo();
+	RDStringInfo2();
 	void Clear();
 	const char* GetName() const;
 	void Encode(CPacket& p) const;
 	void Decode(CPacket& p);
 public :
-	int id; // 称号ID
-	int expire; // 称号过期时间
+	std::string str; // 角色的uid
+	long msgId; // 消息ID
 };
 
-class C2S_TitleGetInfoData
+class RDStringInfo3
 {
 public :
-	C2S_TitleGetInfoData();
+	RDStringInfo3();
 	void Clear();
 	const char* GetName() const;
 	void Encode(CPacket& p) const;
 	void Decode(CPacket& p);
 public :
-	int roleId; // 角色ID
+	std::string str; // 角色的uid
+	long msgId; // 消息ID
 };
 
-class S2C_TitleGetInfoReData
+class RDStringInfo4
 {
 public :
-	S2C_TitleGetInfoReData();
+	RDStringInfo4();
 	void Clear();
 	const char* GetName() const;
 	void Encode(CPacket& p) const;
 	void Decode(CPacket& p);
 public :
-	int roleId; // 角色ID
-	int ret; // 返回值
-	std::vector<RDTitleInfo> titles; // 称号信息
-	std::vector<int> titles2; // 称号信息
+	std::string str; // 角色的uid
+	long msgId; // 消息ID
 };
 

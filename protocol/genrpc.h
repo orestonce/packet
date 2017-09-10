@@ -28,10 +28,17 @@ public :
     void PushItem(const SItemDefine& iDefine);
 };
 
+struct SProtocolSection
+{
+    std::vector<SProtocolDefine> protocols;
+    bool noop;
+public :
+    SProtocolSection();
+};
 
 struct SRpcdataDefine
 {
-    std::vector<SProtocolDefine> protocols;
+    std::vector<SProtocolSection> sections;
     std::vector<std::string> basicTypes;
     std::vector<std::string> composeTypes;
 public :
@@ -59,7 +66,9 @@ private:
 
     void GenFuncDecode(FILE* fp, const SProtocolDefine& pDefine);
 
-    void LoadProtocol(tinyxml2::XMLElement* protocol);
+    void LoadSection(const std::string& fileName, SProtocolSection& section);
+
+    void LoadProtocol(tinyxml2::XMLElement* protocol, SProtocolSection &section);
 
     void check_pname_not_exists(const std::string& pname);
 
@@ -86,18 +95,46 @@ struct SCSOPItem
 class CSOPAllocator
 {
 public :
-    CSOPAllocator(const std::string& tag, int opbegin, int opend);
+    CSOPAllocator(const std::string& tag, int opbegin, int opend, int sectionSize);
     void PushOp(const std::string& opname, const std::string& param, const std::string waitop, const std::string& mark);
 
-    void NextSection(int sectionSize);
+    void NextSection();
     void GenEnumToFile(FILE *fp);
 private:
     std::string tag;
     int opbegin;
     int opend;
 
+    int curBegin;
+    int sectionSize;
+
     int alloc;
 
     std::set<std::string> conflicts;
     std::vector<SCSOPItem> items;
+};
+
+struct SErrorItem
+{
+    std::string name;
+    std::string mark;
+};
+
+struct SErrorSection
+{
+    std::vector<SErrorItem> items;
+    std::string mark;
+public :
+    void Clear();
+};
+
+class CErrorData
+{
+public :
+
+    void LoadFile(const char* fileName);
+    void GenDotH(const char* fileName);
+private:
+    std::vector<SErrorSection> sections;
+    std::set<std::string> conflicts;
 };

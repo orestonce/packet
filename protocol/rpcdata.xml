@@ -1,46 +1,5 @@
-<rpcdata>
-	<protocol name="RDStringInfo" forclient="true" csop="MSG_C2S_ReportUID" mark="上报角色的uid" waitmsg="MSG_S2C_ReportUIDRe">
-		<item type="string" variable="str" mark="角色的uid"/>
-		<item type="long" variable="msgId" mark="消息ID"/>
-	</protocol>
-	<protocol name="RDIntShortPair" forclient="true">
-		<item type="int" variable="id" mark=""/>
-		<item type="short" variable="count" mark=""/>
-	</protocol>
-	<protocol name="CS2SS_LocalInfoData">
-		<item type="byte" variable="type" mark="服务器类型"/>
-		<item type="int" variable="id" mark="本地ID"/>
-	</protocol>
-	<protocol name="RDIntIntPair">
-		<item type="int" variable="id" mark=""/>
-		<item type="int" variable="count" mark=""/>
-		<item type="vector" subtype="CS2SS_LocalInfoData" variable="testVector" mark="vector的测试"/>
-	</protocol>
-	<protocol name="RDItemInfo">
-		<item type="int" variable="itemId" mark=""/>
-		<item type="int" variable="itemCount" mark=""/>
-	</protocol>
-	<protocol name="GW2W_LinkNumReportData">
-		<item type="RDStringInfo" variable="info" mark="连接信息数"/>
-		<item type="byte" variable="openserver" mark="是否为对外开放server"/>
-	</protocol>
-	<!-- test -->
-	<protocol name="S2C_ChampionGetFightRecordReData">
-		<item type="int" variable="roleId" mark="角色ID"/>
-		<item type="int" variable="ret" mark="返回值"/>
-	</protocol>
-	<protocol name="RDTitleInfo">
-		<item type="int" variable="id" mark="称号ID"/>
-		<item type="int" variable="expire" mark="称号过期时间"/>
-	</protocol>
-	<protocol name="C2S_TitleGetInfoData">
-		<item type="int" variable="roleId" mark="角色ID"/>
-	</protocol>
-	<protocol name="S2C_TitleGetInfoReData">
-		<item type="int" variable="roleId" mark="角色ID"/>
-		<item type="int" variable="ret" mark="返回值"/>
-		<item type="vector" subtype="RDTitleInfo" variable="titles" mark="称号信息"/>
-		<item type="vector" subtype="int" variable="titles2" mark="称号信息"/>
-	</protocol>
+<rpcdata sectionpath="./rpcdir/">
+	<section file="CustomData.xml" noop="true" />
+	<section file="Test1.xml" />
+	<section file="Test2.xml" />
 </rpcdata>
-

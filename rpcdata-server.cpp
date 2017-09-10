@@ -241,123 +241,141 @@ void S2C_ChampionGetFightRecordReData::Decode(CPacket& p)
 	ret = p.ReadInt(); 
 }
 
-RDTitleInfo::RDTitleInfo()
+RDStringInfo2::RDStringInfo2()
 {
 	Clear();
 }
 
-void RDTitleInfo::Clear()
+void RDStringInfo2::Clear()
 {
-	id = 0; 
-	expire = 0; 
+	str.clear(); 
+	msgId = 0; 
 }
 
-const char* RDTitleInfo::GetName() const
+const char* RDStringInfo2::GetName() const
 {
-	return "RDTitleInfo";
+	return "RDStringInfo2";
 }
 
-void RDTitleInfo::Encode(CPacket& p) const
+void RDStringInfo2::Encode(CPacket& p) const
 {
-	p.WriteInt(id); 
-	p.WriteInt(expire); 
+	{
+		int len = (int) str.size();
+		p.WriteInt(len); 
+		if (len > 0)
+		{
+			p.WriteByteArray(str.c_str(), len); 
+		}
+	}
+	p.WriteLong(msgId); 
 	p.Flush(); // 在包头部写入包大小信息
 }
 
-void RDTitleInfo::Decode(CPacket& p)
+void RDStringInfo2::Decode(CPacket& p)
 {
-	id = p.ReadInt(); 
-	expire = p.ReadInt(); 
+	{
+		int len = 0;
+		len = p.ReadInt(); 
+		if ( len < 0 || len > CPacket::PACKET_MAX_SIZE ) 
+			throw std::runtime_error("length of str invalid !"); 
+		if ( len > 0 )
+		{
+			str.resize(len); 
+			p.ReadByteArray( &(str[0]), len); 
+		}
+	}
+	msgId = p.ReadLong(); 
 }
 
-C2S_TitleGetInfoData::C2S_TitleGetInfoData()
+RDStringInfo3::RDStringInfo3()
 {
 	Clear();
 }
 
-void C2S_TitleGetInfoData::Clear()
+void RDStringInfo3::Clear()
 {
-	roleId = 0; 
+	str.clear(); 
+	msgId = 0; 
 }
 
-const char* C2S_TitleGetInfoData::GetName() const
+const char* RDStringInfo3::GetName() const
 {
-	return "C2S_TitleGetInfoData";
+	return "RDStringInfo3";
 }
 
-void C2S_TitleGetInfoData::Encode(CPacket& p) const
+void RDStringInfo3::Encode(CPacket& p) const
 {
-	p.WriteInt(roleId); 
+	{
+		int len = (int) str.size();
+		p.WriteInt(len); 
+		if (len > 0)
+		{
+			p.WriteByteArray(str.c_str(), len); 
+		}
+	}
+	p.WriteLong(msgId); 
 	p.Flush(); // 在包头部写入包大小信息
 }
 
-void C2S_TitleGetInfoData::Decode(CPacket& p)
+void RDStringInfo3::Decode(CPacket& p)
 {
-	roleId = p.ReadInt(); 
+	{
+		int len = 0;
+		len = p.ReadInt(); 
+		if ( len < 0 || len > CPacket::PACKET_MAX_SIZE ) 
+			throw std::runtime_error("length of str invalid !"); 
+		if ( len > 0 )
+		{
+			str.resize(len); 
+			p.ReadByteArray( &(str[0]), len); 
+		}
+	}
+	msgId = p.ReadLong(); 
 }
 
-S2C_TitleGetInfoReData::S2C_TitleGetInfoReData()
+RDStringInfo4::RDStringInfo4()
 {
 	Clear();
 }
 
-void S2C_TitleGetInfoReData::Clear()
+void RDStringInfo4::Clear()
 {
-	roleId = 0; 
-	ret = 0; 
-	titles.clear(); 
-	titles2.clear(); 
+	str.clear(); 
+	msgId = 0; 
 }
 
-const char* S2C_TitleGetInfoReData::GetName() const
+const char* RDStringInfo4::GetName() const
 {
-	return "S2C_TitleGetInfoReData";
+	return "RDStringInfo4";
 }
 
-void S2C_TitleGetInfoReData::Encode(CPacket& p) const
+void RDStringInfo4::Encode(CPacket& p) const
 {
-	p.WriteInt(roleId); 
-	p.WriteInt(ret); 
 	{
-		p.WriteInt(titles.size());
-		for(auto it = titles.begin(); it != titles.end(); ++it)
+		int len = (int) str.size();
+		p.WriteInt(len); 
+		if (len > 0)
 		{
-			const RDTitleInfo& temp = *it;
-			temp.Encode(p);
+			p.WriteByteArray(str.c_str(), len); 
 		}
 	}
-	{
-		p.WriteInt(titles2.size());
-		for(auto it = titles2.begin(); it != titles2.end(); ++it)
-		{
-			const int& temp = *it;
-			p.WriteInt(temp); 
-		}
-	}
+	p.WriteLong(msgId); 
 	p.Flush(); // 在包头部写入包大小信息
 }
 
-void S2C_TitleGetInfoReData::Decode(CPacket& p)
+void RDStringInfo4::Decode(CPacket& p)
 {
-	roleId = p.ReadInt(); 
-	ret = p.ReadInt(); 
 	{
-		int sz = p.ReadInt();
-		for(int i = 0; i < sz; ++i)
+		int len = 0;
+		len = p.ReadInt(); 
+		if ( len < 0 || len > CPacket::PACKET_MAX_SIZE ) 
+			throw std::runtime_error("length of str invalid !"); 
+		if ( len > 0 )
 		{
-			RDTitleInfo temp;
-			temp.Decode(p);
-			titles.push_back(temp);
+			str.resize(len); 
+			p.ReadByteArray( &(str[0]), len); 
 		}
 	}
-	{
-		int sz = p.ReadInt();
-		for(int i = 0; i < sz; ++i)
-		{
-			int temp;
-			temp = p.ReadInt(); 
-			titles2.push_back(temp);
-		}
-	}
+	msgId = p.ReadLong(); 
 }
 
